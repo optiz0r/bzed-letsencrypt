@@ -154,7 +154,11 @@ define letsencrypt::csr(
         require => X509_request[$csr],
     }
 
-    $csr_content = pick_default(getvar("::letsencrypt_csr_${domain}"), getvar("facts.'letsencrypt_csr_${domain}'"), '')
+    if versioncmp($::puppetversion, '6.0') > 0 {
+        $csr_content = pick_default(getvar("facts.'letsencrypt_csr_${domain}'"), '')
+    } else {
+        $csr_content = pick_default(getvar("::letsencrypt_csr_${domain}"), '')
+    }
     if ($csr_content =~ /CERTIFICATE REQUEST/) {
         @@letsencrypt::request { $domain :
             csr           => $csr_content,
